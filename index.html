@@ -104,7 +104,11 @@ function categoryLabel(k){return ({gold:'Gold Investment',emergency:'Emergency F
 function categoryColor(k){return ({gold:'gold',emergency:'green',travel:'blue',personal:'pink',fun:'orange'})[k]||'gold'}
 function budgetSaved(cat){return Object.values(S.budgetProgress||{}).reduce((sum,m)=>sum+(m[cat]?.done?Number(m[cat].amount||0):0),0)}
 function budgetSavedMonth(cat,m=ym()){return S.budgetProgress[m]?.[cat]?.done?Number(S.budgetProgress[m][cat].amount||0):0}
-function travelSaved(){return budgetSaved('travel')+S.travelGoals.reduce((s,g)=>s+Number(g.saved||0),0)}
+function travelSaved(){
+  const travelGoalSaved = S.travelGoals.reduce((s,g)=>s+Number(g.saved||0),0);
+  const budgetTravelSaved = budgetSaved('travel');
+  return travelGoalSaved + budgetTravelSaved;
+}
 function skillsLearned(){return S.skills.filter(s=>s.completedDate||s.status==='Completed').length}
 function linkedInStreak(){const dates=[...new Set(S.linkedin.posts.map(p=>p.date))].sort().reverse();if(!dates.length)return 0;let count=0;let cursor=new Date(today()+'T12:00:00');for(let i=0;i<52;i++){const weekStart=new Date(cursor);weekStart.setDate(cursor.getDate()-cursor.getDay());const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);const has=dates.some(d=>{const x=new Date(d+'T12:00:00');return x>=weekStart&&x<=weekEnd});if(has){count++;cursor.setDate(cursor.getDate()-7)}else break;}return count}
 function yogaStats(m=ym()){const days=getMonthDays(m);let done=0;for(let i=1;i<=days;i++){const d=`${m}-${String(i).padStart(2,'0')}`;if(S.yoga[d])done++;}let cur=0,long=0,tmp=0;for(let i=0;i<420;i++){const d=new Date();d.setDate(d.getDate()-i);const key=d.toISOString().slice(0,10);if(S.yoga[key]){if(i===cur)cur++;tmp++;long=Math.max(long,tmp)}else{tmp=0;if(i===0)cur=0}}return {done,days,current:cur,longest:long,percent:pct(done,days)}}
